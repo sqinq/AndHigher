@@ -74,6 +74,10 @@ public class GameActivity extends AppCompatActivity implements NoteListener {
         ground.runBackground();
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
 
     @Override
     protected void onPause() {

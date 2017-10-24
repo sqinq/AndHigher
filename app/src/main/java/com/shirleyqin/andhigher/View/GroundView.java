@@ -189,5 +189,6 @@ public class GroundView extends View implements Observer {
 
     public void stopGame() {
         moveForwardTimer.cancel();
+        model.clearGame();
     }
 }

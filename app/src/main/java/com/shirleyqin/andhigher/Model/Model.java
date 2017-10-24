@@ -122,4 +122,8 @@ public class Model extends Observable {
         }
     }
 
+    public void clearGame() {
+        instance = null;
+    }
+
 }

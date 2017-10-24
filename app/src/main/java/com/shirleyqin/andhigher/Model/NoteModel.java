@@ -18,7 +18,7 @@ import java.util.TimerTask;
 
 public class NoteModel extends Observable {
     private float noteX = 250;
-    private float noteY;
+    private float noteY = 0;
     private float width;
     private float height;
 
@@ -34,7 +34,6 @@ public class NoteModel extends Observable {
     public NoteModel(float width, float height) {
         this.width = width;
         this.height = height;
-        noteY = GroundView.BASELINE - height+10;
     }
 
     public void setGameInterface(NoteListener gameInterface) {
@@ -143,4 +142,5 @@ public class NoteModel extends Observable {
         setChanged();
         notifyObservers(null);
     }
+
 }

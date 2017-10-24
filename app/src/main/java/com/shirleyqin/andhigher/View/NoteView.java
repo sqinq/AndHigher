@@ -74,6 +74,6 @@ public class NoteView extends ImageView implements Observer {
     }
 
     public void jumpUp() {
-        setBackgroundResource(R.drawable.eighth_note_jumpUp);
+        setBackgroundResource(R.drawable.eighth_note_jump_up);
     }
 }
