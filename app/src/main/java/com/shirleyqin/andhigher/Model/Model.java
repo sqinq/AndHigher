@@ -22,11 +22,21 @@ public class Model extends Observable {
 
     public Queue<groundLevel[]> tiles;
 
-    public Model() {
+    private static Model instance;
+
+    private Model() {
         tiles = new LinkedList<>();
-        for (int i=0; i<6; i++)
+        for (int i=0; i<5; i++)
             generateTiles();
     }
+
+    public static synchronized Model getInstance() {
+        if (instance == null) {
+            instance = new Model();
+        }
+        return instance;
+    }
+
 
     public Queue<groundLevel[]> generateTiles() {
         int tileStyle = (int)(Math.random()*difficulity);

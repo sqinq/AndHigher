@@ -1,16 +1,14 @@
 package com.shirleyqin.andhigher.Model;
 
-import java.util.Iterator;
-
 /**
  * Created by shirleyqin on 2017-10-21.
  */
 
-public class Node<T> {
+public class QueueNode<T> {
     private T value;
-    private Node next;
+    private QueueNode next;
 
-    public Node(T value) {
+    public QueueNode(T value) {
         this.value = value;
     }
 
@@ -18,11 +16,11 @@ public class Node<T> {
         return value;
     }
 
-    public void setNext(Node next) {
+    public void setNext(QueueNode next) {
         this.next = next;
     }
 
-    public Node getNext() {
+    public QueueNode getNext() {
         return next;
     }
 

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="baseline">650px</dimen>
+    <dimen name="item_height">120px</dimen>
+    <dimen name="item_width">100px</dimen>
+    <dimen name="tile_length">200px</dimen>
+    <dimen name="tile_height">200px</dimen>
+    <dimen name="tile_thickness">30px</dimen>
+    <dimen name="jump_speed">15px</dimen>
+</resources>

@@ -1,11 +1,12 @@
 package com.shirleyqin.andhigher.Model;
 
-import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 
+import com.shirleyqin.andhigher.NoteListener;
 import com.shirleyqin.andhigher.View.GroundView;
-import com.shirleyqin.andhigher.View.WalkingNoteView;
 
-import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Timer;
@@ -16,24 +17,29 @@ import java.util.TimerTask;
  */
 
 public class NoteModel extends Observable {
-    private float noteX = 200;
-    private float noteY = GroundView.BASELINE;
-    public final int width = 100;
-    public final int height = 120;
+    private float noteX = 250;
+    private float noteY;
+    private float width;
+    private float height;
 
-    public static float initSpeed = 15;
     float verticalSpeed = 0;
-    public boolean isJumping;
+    public boolean isJumping = false;
+    int jumpCount = 0;
 
     int[] tiles;
 
-    private ArrayList<Observer> observers;
+    private NoteListener gameInterface;
 
-    public NoteModel() {
-        noteY -= height-10;
-        isJumping = false;
+
+    public NoteModel(float width, float height) {
+        this.width = width;
+        this.height = height;
+        noteY = GroundView.BASELINE - height+10;
     }
 
+    public void setGameInterface(NoteListener gameInterface) {
+        this.gameInterface = gameInterface;
+    }
 
     public float getNoteX() {
         return noteX;
@@ -41,6 +47,14 @@ public class NoteModel extends Observable {
 
     public float getNoteY() {
         return noteY;
+    }
+
+    public float getWidth() {
+        return width;
+    }
+
+    public float getHeight() {
+        return height;
     }
 
     public void setNoteY(float noteY) {
@@ -60,9 +74,9 @@ public class NoteModel extends Observable {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
-                    verticalSpeed -= 0.5;
+                verticalSpeed -= 0.5;
 
-
+                //check if there is a tile to land on
                 for (int height : tiles) {
                         if (noteY+110 <= height &&
                                 noteY + 110 - verticalSpeed >= height &&
@@ -72,16 +86,29 @@ public class NoteModel extends Observable {
                             setChanged();
                             notifyObservers(null);
                             isJumping = false;
+                            jumpCount = 0;
                             this.cancel();
                         }
-                    }
+                }
 
-
+                //if the note is jumping out of the screen
                 if (noteY < 0) {
                     noteY = 0;
                     verticalSpeed = 0;
                     setChanged();
                     notifyObservers(null);
+
+                //if the note falls off the screen
+                } else if (gameInterface.offScreen(noteY)) {
+                    Looper.prepare();
+                    Handler mHandler = new Handler() {
+                        @Override
+                        public void handleMessage(Message msg) {
+                            gameInterface.stopGame();
+                        }
+                    };
+                     mHandler.sendEmptyMessage(1);
+                    Looper.loop();
                 } else {
                     noteY -= verticalSpeed ;
                     setChanged();
@@ -90,12 +117,15 @@ public class NoteModel extends Observable {
             }
         };
 
-        if (verticalSpeed == 0) {
+        if (jumpCount == 0) {
             verticalSpeed = initSpeed;
             isJumping = true;
             new Timer().schedule(task, 0, 1000 / 30);
-        } else
+            jumpCount ++;
+        } else if (jumpCount == 1) {
             verticalSpeed = initSpeed;
+            jumpCount++;
+        }
 
     }
 
@@ -108,7 +138,7 @@ public class NoteModel extends Observable {
     }
 
     @Override
-    public synchronized void addObserver(Observer o) {
+    public void addObserver(Observer o) {
         super.addObserver(o);
         setChanged();
         notifyObservers(null);

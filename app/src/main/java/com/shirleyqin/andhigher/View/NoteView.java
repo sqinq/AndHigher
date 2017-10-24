@@ -1,57 +1,79 @@
 package com.shirleyqin.andhigher.View;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
+import android.content.res.Resources;
 import android.graphics.drawable.AnimationDrawable;
-import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.util.AttributeSet;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.shirleyqin.andhigher.Model.NoteModel;
 import com.shirleyqin.andhigher.R;
 
+import java.util.Observable;
+import java.util.Observer;
+
 /**
- * Created by shirleyqin on 2017-10-04.
+ * Created by shirleyqin on 2017-10-11.
  */
 
-public class NoteView extends View {
-    public float bitmapX;
-    public float bitmapY;
-
+public class NoteView extends ImageView implements Observer {
     private AnimationDrawable animi;
+
+    float width;
+    float height;
+
+    private NoteModel model;
 
     public NoteView(Context context) {
         super(context);
 
-        bitmapX = 0;
-        bitmapY = GroundView.BASELINE-120;
+        Resources r = getResources();
+        width = r.getDimension(R.dimen.item_width);
+        height = r.getDimension(R.dimen.item_height);
 
-        WalkingNoteView note = new WalkingNoteView(context);
-        animi = note.getAnimi();
+        model = new NoteModel(width, height);
+        model.addObserver(this);
     }
 
-    
-
-    public void startAnimi() {
-        animi.start();
+    public NoteView(Context context, AttributeSet attrs) {
+        super(context, attrs);
     }
+
+    public NoteView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
+
+    public void setupAnimi(int id) {
+        this.setBackgroundResource(id);
+        this.setLayoutParams(new ViewGroup.LayoutParams((int)width, (int)height));
+    }
+
+    public AnimationDrawable getAnimi() {
+        return animi;
+    }
+
+    public NoteModel getModel() {
+        return model;
+    }
+
+    public void setAnim(AnimationDrawable anim){
+        this.animi = anim;
+    }
+
 
     @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+    public void update(Observable observable, Object o) {
+        NoteModel note = (NoteModel) observable;
+        this.setY(note.getNoteY());
+        this.setX(note.getNoteX());
 
-     /*   Paint paint = new Paint();
-        Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.eighth_note_normal_1);
-        bitmap = Bitmap.createScaledBitmap(bitmap, width, height, false);
-        canvas.drawBitmap(bitmap, bitmapX, bitmapY, paint);
-
-        if (bitmap.isRecycled()) {
-            bitmap.recycle();
-        }*/
+        if (o != null) {
+            boolean jumpUp = (boolean) o;
+        }
     }
 
-
+    public void jumpUp() {
+        setBackgroundResource(R.drawable.eighth_note_jumpUp);
+    }
 }

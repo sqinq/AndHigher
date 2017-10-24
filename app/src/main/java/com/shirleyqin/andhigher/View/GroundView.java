@@ -1,23 +1,21 @@
 package com.shirleyqin.andhigher.View;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.View;
 
 import com.shirleyqin.andhigher.Model.Model;
-import com.shirleyqin.andhigher.Model.Node;
+import com.shirleyqin.andhigher.Model.QueueNode;
 import com.shirleyqin.andhigher.Model.NoteModel;
 import com.shirleyqin.andhigher.Model.groundLevel;
 import com.shirleyqin.andhigher.Model.myLinkedList;
 import com.shirleyqin.andhigher.R;
 
 
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Queue;
@@ -30,32 +28,38 @@ import java.util.TimerTask;
 
 
 public class GroundView extends View implements Observer {
-    private final int LENGTH = 200;
-    private final int HEIGHT = 150;
-    private final int THICKNESS = 30;
+    private float tileLength;
+    private float HEIGHT;
+    private float tileThickness;
 
-    public static final int BASELINE = 650;
+    public static float BASELINE;
 
     myLinkedList<int[]> heights;
     float bitmapX;
     float initX;
 
-    NoteModel noteModel;
+    private NoteModel noteModel;
     Model model;
 
     Timer moveForwardTimer;
-    Node<int[]> currentTile;
+    QueueNode<int[]> currentTile;
 
     public GroundView(Context context, float initX) {
         super(context);
-        model = new Model();
+        model = Model.getInstance();
         model.addObserver(this);
         heights = new myLinkedList<>();
 
         this.bitmapX = initX;
         this.initX = initX;
-        for (groundLevel[] block: model.tiles) {
 
+        Resources r = getResources();
+        BASELINE = r.getDimension(R.dimen.baseline);
+        tileLength = r.getDimension(R.dimen.tile_length);
+        HEIGHT = r.getDimension(R.dimen.tile_height);
+        tileThickness = r.getDimension(R.dimen.tile_thickness);
+
+        for (groundLevel[] block: model.tiles) {
             int [] height = new int[block.length];
             int i = 0;
             for (groundLevel tile: block) {
@@ -64,11 +68,16 @@ public class GroundView extends View implements Observer {
             }
             heights.add(height);
         }
+
         moveForwardTimer = new Timer();
     }
 
     public void setNoteModel(NoteModel note) {
         this.noteModel = note;
+    }
+
+    public NoteModel getNoteModel() {
+        return noteModel;
     }
 
     @Override
@@ -77,13 +86,13 @@ public class GroundView extends View implements Observer {
 
         Paint paint = new Paint();
         Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.tile);
-        bitmap = Bitmap.createScaledBitmap(bitmap, LENGTH, THICKNESS, false);
+        bitmap = Bitmap.createScaledBitmap(bitmap, (int)tileLength, (int)tileThickness, false);
 
         int blockNum = 0;
-        for (Node<int[]> block = heights.getFirst(); block.hasNext(); block = block.getNext()) {
+        for (QueueNode<int[]> block = heights.getFirst(); block.hasNext(); block = block.getNext()) {
             int [] tiles = block.getValue();
             for (int height: tiles) {
-                canvas.drawBitmap(bitmap, bitmapX + LENGTH * blockNum, height, paint);
+                canvas.drawBitmap(bitmap, bitmapX + tileLength * blockNum, height, paint);
             }
             ++ blockNum;
         }
@@ -103,7 +112,7 @@ public class GroundView extends View implements Observer {
 
                 bitmapX -= 5;
                 disPassed += 5;
-                if (bitmapX <= -3*LENGTH) {
+                if (bitmapX <= -3*tileLength) {
                     model.tiles.remove();
                     model.tiles.remove();
                     model.tiles.remove();
@@ -114,17 +123,16 @@ public class GroundView extends View implements Observer {
                 postInvalidate();
 
 
-                if ((disPassed+noteModel.width-15)%LENGTH == 0 && currentTile.hasNext()) {
-                    System.out.println(heights.size());
+                if ((disPassed+noteModel.getWidth()-15)%tileLength == 0 && currentTile.hasNext()) {
                     currentTile = currentTile.getNext();
                     noteModel.setTiles(currentTile.getValue());
                 }
 
-                if (disPassed % LENGTH == 0) {
+                if (disPassed % tileLength == 0) {
                     model.addDistance();
                 }
 
-                if ((disPassed+noteModel.width/2-15) % LENGTH == 0) {
+                if ((disPassed+noteModel.getWidth()/2-15) % tileLength == 0) {
                     if (!noteModel.isJumping) {
                         boolean hasSameTile = false;
                         for (int i : currentTile.getValue()) {
@@ -145,19 +153,19 @@ public class GroundView extends View implements Observer {
         int height;
         switch (g) {
             case UG:
-                height = BASELINE + HEIGHT;
+                height = (int)(BASELINE + HEIGHT);
                 break;
             case GD:
-                height = BASELINE;
+                height = (int)BASELINE;
                 break;
             case L1:
-                height = BASELINE - HEIGHT;
+                height = (int)(BASELINE - HEIGHT);
                 break;
             case L2:
-                height = BASELINE - HEIGHT * 2;
+                height = (int)(BASELINE - HEIGHT * 2);
                 break;
             default:
-                height = BASELINE;
+                height = (int)BASELINE;
         }
         return height;
     }

@@ -1,43 +1,30 @@
 package com.shirleyqin.andhigher.Activity;
 
-import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.graphics.drawable.AnimationDrawable;
-import android.os.Message;
 import android.support.annotation.Nullable;
-import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.FrameLayout;
 
-import com.shirleyqin.andhigher.Model.Model;
 import com.shirleyqin.andhigher.Model.NoteModel;
-import com.shirleyqin.andhigher.Model.groundLevel;
+import com.shirleyqin.andhigher.NoteListener;
 import com.shirleyqin.andhigher.R;
 import com.shirleyqin.andhigher.View.GroundView;
 import com.shirleyqin.andhigher.View.NoteView;
-import com.shirleyqin.andhigher.View.WalkingNoteView;
-
-import java.util.ArrayList;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class GameActivity extends AppCompatActivity {
+public class GameActivity extends AppCompatActivity implements NoteListener {
 
-    NoteModel note;
-    WalkingNoteView noteView;
+    NoteModel noteModel;
+    NoteView note;
     GroundView ground;
 
 
@@ -54,19 +41,19 @@ public class GameActivity extends AppCompatActivity {
 
 
 
-        noteView = new WalkingNoteView(this);
-        noteView.setupAnimi(R.drawable.walking_note);
-        note = new NoteModel();
-        note.addObserver(noteView);
-        anim = (AnimationDrawable) noteView.getBackground();
-        noteView.setAnim(anim);
-        frame.addView(noteView);
+        note = new NoteView(this);
+        note.setupAnimi(R.drawable.walking_note);
+        noteModel = note.getModel();
+        noteModel.setGameInterface(this);
+
+        anim = (AnimationDrawable) note.getBackground();
+        note.setAnim(anim);
+        frame.addView(note);
 
          frame.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                note.jump(NoteModel.initSpeed);
-
+                noteModel.jump(getResources().getDimension(R.dimen.jump_speed));
                 return false;
             }
         });
@@ -74,7 +61,7 @@ public class GameActivity extends AppCompatActivity {
 
 
         ground = new GroundView(GameActivity.this, 200);
-        ground.setNoteModel(note);
+        ground.setNoteModel(noteModel);
         frame.addView(ground);
 
 
@@ -93,5 +80,29 @@ public class GameActivity extends AppCompatActivity {
         super.onPause();
 
         ground.stopGame();
+    }
+
+    @Override
+    public void stopGame() {
+        ground.stopGame();
+        AlertDialog.Builder builder = new AlertDialog.Builder(GameActivity.this);
+        AlertDialog alert = builder.setTitle("Game Over")
+                .setPositiveButton("Play again", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                    }
+                })
+                .setNegativeButton("Leave", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        GameActivity.this.finish();
+                    }
+                }).create();
+        alert.show();
+    }
+
+    @Override
+    public boolean offScreen(float height) {
+        return height>=ground.getHeight();
     }
 }

@@ -1,15 +1,12 @@
 package com.shirleyqin.andhigher.Model;
 
-import java.util.Iterator;
-import java.util.Queue;
-
 /**
  * Created by shirleyqin on 2017-10-21.
  */
 
 public class myLinkedList<T> {
-    Node<T> first;
-    Node<T> last;
+    QueueNode<T> first;
+    QueueNode<T> last;
     int length;
 
     public myLinkedList() {
@@ -18,24 +15,24 @@ public class myLinkedList<T> {
 
     public void add(T value) {
         if (first == null) {
-            first = new Node<>(value);
+            first = new QueueNode<>(value);
             last = first;
             length = 1;
         } else {
-            Node newNode = new Node<>(value);
-            last.setNext(newNode);
-            last = newNode;
+            QueueNode newQueueNode = new QueueNode<>(value);
+            last.setNext(newQueueNode);
+            last = newQueueNode;
             ++ length;
         }
     }
 
     public void removeFirst() {
-        Node temp = first;
+        QueueNode temp = first;
         first = temp.getNext();
         -- length;
     }
 
-    public Node getFirst() {
+    public QueueNode getFirst() {
         return first;
     }
 
