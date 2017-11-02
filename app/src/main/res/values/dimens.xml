@@ -7,4 +7,5 @@
     <dimen name="tile_height">200px</dimen>
     <dimen name="tile_thickness">30px</dimen>
     <dimen name="jump_speed">15px</dimen>
+    <dimen name="hori_normal_speed">5px</dimen>
 </resources>

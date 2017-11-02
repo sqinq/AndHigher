@@ -1,8 +1,10 @@
 package com.shirleyqin.andhigher.Model;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Pair;
 
 import com.shirleyqin.andhigher.NoteListener;
 import com.shirleyqin.andhigher.View.GroundView;
@@ -17,130 +19,97 @@ import java.util.TimerTask;
  */
 
 public class NoteModel extends Observable {
-    private float noteX = 250;
-    private float noteY = 0;
-    private float width;
-    private float height;
-
-    float verticalSpeed = 0;
-    public boolean isJumping = false;
-    int jumpCount = 0;
-
-    int[] tiles;
+    private groundLevel landOnTile;
 
     private NoteListener gameInterface;
 
+    public boolean isJumping = false;
+    public boolean checkLastTile = false;
+    public int jumpCount = 0;
+    int points = 0;
 
-    public NoteModel(float width, float height) {
-        this.width = width;
-        this.height = height;
-    }
+    public Tile[]  LastTiles;
+    public Tile[]  CurrenTiles = null;
+
+
 
     public void setGameInterface(NoteListener gameInterface) {
         this.gameInterface = gameInterface;
     }
 
-    public float getNoteX() {
-        return noteX;
+    public void setTiles(Tile[]  tiles) {
+        this.LastTiles = CurrenTiles;
+        this.CurrenTiles = tiles;
     }
 
-    public float getNoteY() {
-        return noteY;
+    public void addPoints(int pointNum) {
+        points += pointNum;
     }
 
-    public float getWidth() {
-        return width;
+    public boolean checkOffScreen(float y) {
+        return gameInterface.offScreen(y);
     }
 
-    public float getHeight() {
-        return height;
+    public void stopGame() {
+        gameInterface.stopGame();
     }
 
-    public void setNoteY(float noteY) {
-        this.noteY = noteY;
+    public void jump(final float initSpeed) {
+
+        if (jumpCount == 0 || jumpCount == 1) {
+            setChanged();
+            notifyObservers(initSpeed);
+            jumpCount ++;
+        }
     }
 
-    public void setNoteX(float noteX) {
-        this.noteX = noteX;
+    public void jump() {
+        if (jumpCount == 0 || jumpCount == 1) {
+            setChanged();
+            notifyObservers();
+            jumpCount ++;
+        }
     }
 
-    public void setTiles(int [] tiles) {
-        this.tiles = tiles;
+
+    public void checkHitItem() {
+
     }
 
-    public void jump(float initSpeed) {
-
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                verticalSpeed -= 0.5;
-
-                //check if there is a tile to land on
-                for (int height : tiles) {
-                        if (noteY+110 <= height &&
-                                noteY + 110 - verticalSpeed >= height &&
-                                verticalSpeed <= 0) {
-                            noteY = height - 110;
-                            verticalSpeed = 0;
-                            setChanged();
-                            notifyObservers(null);
-                            isJumping = false;
-                            jumpCount = 0;
-                            this.cancel();
-                        }
-                }
-
-                //if the note is jumping out of the screen
-                if (noteY < 0) {
-                    noteY = 0;
-                    verticalSpeed = 0;
-                    setChanged();
-                    notifyObservers(null);
-
-                //if the note falls off the screen
-                } else if (gameInterface.offScreen(noteY)) {
-                    Looper.prepare();
-                    Handler mHandler = new Handler() {
-                        @Override
-                        public void handleMessage(Message msg) {
-                            gameInterface.stopGame();
-                        }
-                    };
-                     mHandler.sendEmptyMessage(1);
-                    Looper.loop();
-                } else {
-                    noteY -= verticalSpeed ;
-                    setChanged();
-                    notifyObservers(null);
+    public float landOnHeight(final float Y, float speed, float height) {
+        if (checkLastTile) {
+            for (Tile t : LastTiles) {
+                int h = t.getLevel().getHeight(GroundView.BASELINE, height);
+                if (Y+110 <= h &&
+                        Y + 110 - speed >= h &&
+                        speed <= 0) {
+                    landOnTile = t.getLevel();
+                    return h-110;
                 }
             }
-        };
-
-        if (jumpCount == 0) {
-            verticalSpeed = initSpeed;
-            isJumping = true;
-            new Timer().schedule(task, 0, 1000 / 30);
-            jumpCount ++;
-        } else if (jumpCount == 1) {
-            verticalSpeed = initSpeed;
-            jumpCount++;
         }
 
+        for (Tile t : CurrenTiles) {
+            int h = t.getLevel().getHeight(GroundView.BASELINE, height);
+            if (Y+110 <= h &&
+                    Y + 110 - speed >= h &&
+                    speed <= 0) {
+                landOnTile = t.getLevel();
+                return h-110;
+            }
+        }
+
+        return -1;
     }
 
     public void pause() {
 
     }
 
-    public float landOn() {
-        return noteY+110;
+    public groundLevel landOn() {
+        return landOnTile;
     }
 
-    @Override
-    public void addObserver(Observer o) {
-        super.addObserver(o);
-        setChanged();
-        notifyObservers(null);
-    }
+
 
 }

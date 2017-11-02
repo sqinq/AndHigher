@@ -26,6 +26,18 @@ public class myLinkedList<T> {
         }
     }
 
+    public void addAll(myLinkedList<T> values) {
+        if (first == null) {
+            first = values.first;
+            last = values.last;
+            length = values.length;
+        } else {
+            last.setNext(values.first);
+            last = values.last;
+            length += values.length;
+        }
+    }
+
     public void removeFirst() {
         QueueNode temp = first;
         first = temp.getNext();

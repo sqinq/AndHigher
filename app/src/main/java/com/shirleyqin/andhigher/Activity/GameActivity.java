@@ -23,7 +23,6 @@ import com.shirleyqin.andhigher.View.NoteView;
  */
 public class GameActivity extends AppCompatActivity implements NoteListener {
 
-    NoteModel noteModel;
     NoteView note;
     GroundView ground;
 
@@ -42,8 +41,10 @@ public class GameActivity extends AppCompatActivity implements NoteListener {
 
 
         note = new NoteView(this);
+        note.setX(200);
         note.setupAnimi(R.drawable.walking_note);
-        noteModel = note.getModel();
+
+        final NoteModel noteModel = note.getModel();
         noteModel.setGameInterface(this);
 
         anim = (AnimationDrawable) note.getBackground();
@@ -53,7 +54,7 @@ public class GameActivity extends AppCompatActivity implements NoteListener {
          frame.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                noteModel.jump(getResources().getDimension(R.dimen.jump_speed));
+                noteModel.jump();
                 return false;
             }
         });
