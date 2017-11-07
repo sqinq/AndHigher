@@ -11,9 +11,11 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import com.shirleyqin.andhigher.Model.Model;
 import com.shirleyqin.andhigher.Model.NoteModel;
 import com.shirleyqin.andhigher.NoteListener;
 import com.shirleyqin.andhigher.R;
+import com.shirleyqin.andhigher.TileHeightTranslater;
 import com.shirleyqin.andhigher.View.GroundView;
 import com.shirleyqin.andhigher.View.NoteView;
 
@@ -26,8 +28,9 @@ public class GameActivity extends AppCompatActivity implements NoteListener {
     NoteView note;
     GroundView ground;
 
+    Model model;
 
-    private AnimationDrawable anim = null;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,8 +41,6 @@ public class GameActivity extends AppCompatActivity implements NoteListener {
         FrameLayout frame = (FrameLayout) findViewById(R.id.frameLayout);
 
 
-
-
         note = new NoteView(this);
         note.setX(200);
         note.setupAnimi(R.drawable.walking_note);
@@ -47,8 +48,6 @@ public class GameActivity extends AppCompatActivity implements NoteListener {
         final NoteModel noteModel = note.getModel();
         noteModel.setGameInterface(this);
 
-        anim = (AnimationDrawable) note.getBackground();
-        note.setAnim(anim);
         frame.addView(note);
 
          frame.setOnTouchListener(new View.OnTouchListener() {
@@ -60,25 +59,21 @@ public class GameActivity extends AppCompatActivity implements NoteListener {
         });
 
 
-
         ground = new GroundView(GameActivity.this, 200);
         ground.setNoteModel(noteModel);
+        model = Model.getInstance();
         frame.addView(ground);
 
-
+        TileHeightTranslater.init(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        anim.start();
+        note.startAnimi();
         ground.runBackground();
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-    }
 
     @Override
     protected void onPause() {
@@ -91,10 +86,11 @@ public class GameActivity extends AppCompatActivity implements NoteListener {
     public void stopGame() {
         ground.stopGame();
         AlertDialog.Builder builder = new AlertDialog.Builder(GameActivity.this);
-        AlertDialog alert = builder.setTitle("Game Over")
+        builder.setTitle("Game Over")
                 .setPositiveButton("Play again", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
+
                     }
                 })
                 .setNegativeButton("Leave", new DialogInterface.OnClickListener() {
@@ -102,7 +98,8 @@ public class GameActivity extends AppCompatActivity implements NoteListener {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         GameActivity.this.finish();
                     }
-                }).create();
+                });
+        AlertDialog alert = builder.create();
         alert.show();
     }
 

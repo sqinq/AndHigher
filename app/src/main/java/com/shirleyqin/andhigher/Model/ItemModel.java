@@ -11,15 +11,11 @@ import java.util.Observable;
  */
 
 public abstract class ItemModel extends Observable {
-    NoteModel note;
 
     int imageId;
 
-    public void setNote(NoteModel note) {
-        this.note = note;
-    }
 
-    public void touched() {
+    public void touched(NoteModel note) {
     }
 
     public int getImageId() {

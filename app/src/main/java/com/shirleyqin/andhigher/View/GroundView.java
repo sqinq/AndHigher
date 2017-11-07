@@ -17,6 +17,7 @@ import com.shirleyqin.andhigher.Model.Tile;
 import com.shirleyqin.andhigher.Model.groundLevel;
 import com.shirleyqin.andhigher.Model.myLinkedList;
 import com.shirleyqin.andhigher.R;
+import com.shirleyqin.andhigher.TileHeightTranslater;
 
 
 import java.lang.reflect.Array;
@@ -42,9 +43,9 @@ public class GroundView extends View implements Observer {
     public static float BASELINE;
     float bitmapX;
     int itemEdge;
-    float initX;
 
-    Model model;
+    private Model model;
+    private NoteModel noteModel;
 
     Timer moveForwardTimer;
 
@@ -55,7 +56,6 @@ public class GroundView extends View implements Observer {
         model.addObserver(this);
 
         this.bitmapX = initX;
-        this.initX = initX;
         this.itemEdge = (int)getResources().getDimension(R.dimen.item_height);
 
         Resources r = getResources();
@@ -71,7 +71,7 @@ public class GroundView extends View implements Observer {
     }
 
     public void setNoteModel(NoteModel note) {
-        model.setNoteModel(note);
+        this.noteModel = note;
     }
 
 
@@ -93,7 +93,7 @@ public class GroundView extends View implements Observer {
         for (QueueNode<Tile[]> block = model.tiles.getFirst(); block.hasNext(); block = block.getNext()) {
             Tile [] tiles = block.getValue();
             for (Tile t: tiles) {
-                int height = translateHeight(t.getLevel());
+                int height = TileHeightTranslater.levelToHeight(t.getLevel());
                 canvas.drawBitmap(tileImage, bitmapX + tileLength * blockNum, height, paint);
 
                 if (t.hasItem()) {
@@ -107,7 +107,7 @@ public class GroundView extends View implements Observer {
     }
 
     public void runBackground() {
-        model.prepare();
+        noteModel.setInitTiles(model.tiles.getFirst());
 
         moveForwardTimer.schedule(new TimerTask() {
             int disPassed = 0;
@@ -125,47 +125,27 @@ public class GroundView extends View implements Observer {
                 postInvalidate();
 
 
-                if ((disPassed+noteWidth-15)%tileLength == 0) {
-                    model.moveForward();
+                if ((disPassed+noteWidth)%tileLength < speed) {
+                    noteModel.moveForward();
                 }
 
-                if (disPassed % tileLength == 0) {
+                if (disPassed % tileLength < speed) {
                     model.addDistance();
+                    noteModel.fallOffTile();
                 }
 
-                if ((disPassed+noteWidth/2-15) % tileLength == 0) {
-                    model.fallOffTile();
+                if ((disPassed+noteWidth/2) % tileLength < speed) {
                 }
 
+                int rightToEdge = (int)((disPassed+noteWidth)%tileLength);
+                int leftToEdge = rightToEdge - (int)noteWidth;
 
-                int disToBeginning = (int) (tileLength-itemEdge)/2;
-                if ((disPassed+noteWidth)%tileLength>disToBeginning
-                        && disPassed%tileLength<(tileLength-disToBeginning)) {
-                }
+                noteModel.hitItem(leftToEdge, rightToEdge, (int) (tileLength-itemEdge)/2);
             }
         }, 500, 1000/30);
     }
 
-    private int translateHeight(groundLevel g) {
-        int height;
-        switch (g) {
-            case UG:
-                height = (int)(BASELINE + HEIGHT);
-                break;
-            case GD:
-                height = (int)BASELINE;
-                break;
-            case L1:
-                height = (int)(BASELINE - HEIGHT);
-                break;
-            case L2:
-                height = (int)(BASELINE - HEIGHT * 2);
-                break;
-            default:
-                height = (int)BASELINE;
-        }
-        return height;
-    }
+
 
     @Override
     public void update(Observable observable, Object o) {

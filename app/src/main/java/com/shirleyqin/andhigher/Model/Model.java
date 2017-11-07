@@ -20,9 +20,6 @@ public class Model extends Observable {
     public myLinkedList<Tile[]> tiles;
 
     private static Model instance;
-    private NoteModel noteModel;
-
-    QueueNode<Tile[]> currentTile;
 
     private Model() {
         tiles = new myLinkedList<>();
@@ -35,10 +32,6 @@ public class Model extends Observable {
             instance = new Model();
         }
         return instance;
-    }
-
-    public void setNoteModel(NoteModel noteModel) {
-        this.noteModel = noteModel;
     }
 
     public void generateTiles() {
@@ -115,11 +108,6 @@ public class Model extends Observable {
         generateTiles();
     }
 
-    public void moveForward() {
-        currentTile = currentTile.getNext();
-        noteModel.setTiles(currentTile.getValue());
-        noteModel.checkLastTile = true;
-    }
 
     public void addDistance() {
         ++ distance;
@@ -129,28 +117,7 @@ public class Model extends Observable {
         }
     }
 
-    public void fallOffTile() {
-        if (!noteModel.isJumping) {
-            boolean hasSameTile = false;
-            for (Tile t : currentTile.getValue()) {
-                groundLevel i = t.getLevel();
-                if (i == noteModel.landOn()) {
-                    hasSameTile = true;
-                    break;
-                }
-            }
-            if (!hasSameTile) {
-                noteModel.checkLastTile = false;
-                noteModel.jump(0);
-            }
-        }
-        noteModel.checkLastTile = false;
-    }
 
-    public void prepare() {
-        currentTile = tiles.getFirst();
-        noteModel.setTiles(currentTile.getValue());
-    }
 
     public void clearGame() {
         instance = null;

@@ -24,4 +24,8 @@ public class Tile {
     public boolean hasItem() {
         return item != null;
     }
+
+    public void removeItem() {
+        item = null;
+    }
 }

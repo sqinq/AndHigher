@@ -8,6 +8,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.shirleyqin.andhigher.Model.NoteModel;
@@ -39,12 +40,14 @@ public class NoteView extends ImageView implements Observer {
         super(context);
 
         Resources r = getResources();
-        width = r.getDimension(R.dimen.item_width);
-        height = r.getDimension(R.dimen.item_height);
+        width = r.getDimension(R.dimen.note_width);
+        height = r.getDimension(R.dimen.note_height);
         levelHeight = r.getDimension(R.dimen.tile_height);
         initSpeed = r.getDimension(R.dimen.jump_speed);
 
         model = new NoteModel();
+        model.setNoteHeight(height);
+        model.setItemHeight(r.getDimension(R.dimen.item_height));
         model.addObserver(this);
     }
 
@@ -59,18 +62,15 @@ public class NoteView extends ImageView implements Observer {
     public void setupAnimi(int id) {
         this.setBackgroundResource(id);
         this.setLayoutParams(new ViewGroup.LayoutParams((int)width, (int)height));
+        animi = (AnimationDrawable) this.getBackground();
     }
 
-    public AnimationDrawable getAnimi() {
-        return animi;
+    public void startAnimi() {
+        animi.start();
     }
 
     public NoteModel getModel() {
         return model;
-    }
-
-    public void setAnim(AnimationDrawable anim){
-        this.animi = anim;
     }
 
 
@@ -96,13 +96,14 @@ public class NoteView extends ImageView implements Observer {
 
             @Override
             public void run() {
-                verticalSpeed -= 0.45;
+                verticalSpeed -= 0.35;
 
                 final float Y = getY();
                 //check if there is a tile to land on
-                float height = model.landOnHeight(Y, verticalSpeed, levelHeight);
-                if (height > 0) {
-                    setY(height);
+                float landOn = model.landOnHeight(Y, verticalSpeed, height);
+                if (landOn > 0) {
+                    setY(landOn);
+                    model.refreshLocation(getX(), getY());
                     verticalSpeed = 0;
                     postInvalidate();
 
@@ -114,6 +115,7 @@ public class NoteView extends ImageView implements Observer {
                 //if the note is jumping out of the screen
                 if (Y < 0) {
                     setY(0);
+                    model.refreshLocation(getX(), getY());
                     verticalSpeed = 0;
                     postInvalidate();
 
@@ -131,6 +133,7 @@ public class NoteView extends ImageView implements Observer {
                     this.cancel();
                 } else {
                     setY(Y-verticalSpeed);
+                    model.refreshLocation(getX(), getY());
                     postInvalidate();
                 }
             }

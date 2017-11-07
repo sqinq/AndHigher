@@ -7,6 +7,6 @@ import android.content.Context;
  */
 
 public interface NoteListener {
-    public boolean offScreen(float height);
-    public void stopGame();
+    boolean offScreen(float height);
+    void stopGame();
 }

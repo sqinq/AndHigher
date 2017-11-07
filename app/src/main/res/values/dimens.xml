@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="baseline">650px</dimen>
-    <dimen name="item_height">120px</dimen>
+    <dimen name="baseline">750px</dimen>
+    <dimen name="note_height">130px</dimen>
+    <dimen name="note_width">85px</dimen>
+    <dimen name="item_height">150px</dimen>
     <dimen name="item_width">100px</dimen>
-    <dimen name="tile_length">200px</dimen>
-    <dimen name="tile_height">200px</dimen>
-    <dimen name="tile_thickness">30px</dimen>
-    <dimen name="jump_speed">15px</dimen>
-    <dimen name="hori_normal_speed">5px</dimen>
+    <dimen name="tile_length">259px</dimen>
+    <dimen name="tile_height">250px</dimen>
+    <dimen name="tile_thickness">35px</dimen>
+    <dimen name="jump_speed">14px</dimen>
+    <dimen name="hori_normal_speed">7px</dimen>
 </resources>

@@ -13,8 +13,8 @@ public class CoinModel extends ItemModel {
     }
 
     @Override
-    public void touched() {
-        super.touched();
+    public void touched(NoteModel note) {
+        super.touched(note);
         note.addPoints(5);
 
     }
